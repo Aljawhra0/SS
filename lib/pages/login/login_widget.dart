@@ -3,6 +3,7 @@ import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'login_model.dart';
 export 'login_model.dart';
 
@@ -22,6 +23,22 @@ class _LoginWidgetState extends State<LoginWidget> {
   void initState() {
     super.initState();
     _model = createModel(context, () => LoginModel());
+
+    // On page load action.
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      GoRouter.of(context).prepareAuthEvent();
+
+      final user = await authManager.signInWithEmail(
+        context,
+        _model.emailAddressTextController.text,
+        _model.passwordTextController.text,
+      );
+      if (user == null) {
+        return;
+      }
+
+      context.goNamedAuth('monday', context.mounted);
+    });
 
     _model.emailAddressTextController ??= TextEditingController();
     _model.emailAddressFocusNode ??= FocusNode();
@@ -121,6 +138,23 @@ class _LoginWidgetState extends State<LoginWidget> {
                                       controller:
                                           _model.emailAddressTextController,
                                       focusNode: _model.emailAddressFocusNode,
+                                      onFieldSubmitted: (_) async {
+                                        GoRouter.of(context).prepareAuthEvent();
+
+                                        final user =
+                                            await authManager.signInWithEmail(
+                                          context,
+                                          _model
+                                              .emailAddressTextController.text,
+                                          _model.passwordTextController.text,
+                                        );
+                                        if (user == null) {
+                                          return;
+                                        }
+
+                                        context.goNamedAuth(
+                                            'monday', context.mounted);
+                                      },
                                       autofocus: true,
                                       autofillHints: const [AutofillHints.email],
                                       obscureText: false,
@@ -290,7 +324,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                       }
 
                                       context.goNamedAuth(
-                                          'Settings', context.mounted);
+                                          'monday', context.mounted);
                                     },
                                     text: 'Sign In',
                                     options: FFButtonOptions(
